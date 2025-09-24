@@ -2,6 +2,7 @@ package com.little_creatures.mod;
 
 import com.little_creatures.mod.entity.WoodGolem;
 import com.little_creatures.mod.registry.ModEntityTypes;
+import com.little_creatures.mod.registry.ModItemTypes;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -17,6 +18,7 @@ public class LittleCreatures
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         ModEntityTypes.ENTITIES.register(modEventBus);
+        ModItemTypes.ITEMS.register(modEventBus);
     }
 
     @Mod.EventBusSubscriber(modid = LittleCreatures.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
