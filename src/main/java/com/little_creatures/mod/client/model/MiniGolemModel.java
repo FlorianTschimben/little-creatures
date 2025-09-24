@@ -13,7 +13,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.PathfinderMob;
 
-public class WoodGolemModel<T extends PathfinderMob> extends EntityModel<T> {
+public class MiniGolemModel<T extends PathfinderMob> extends EntityModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("modid", "0"), "main");
 	private final ModelPart left_leg;
@@ -23,7 +23,7 @@ public class WoodGolemModel<T extends PathfinderMob> extends EntityModel<T> {
 	private final ModelPart torso;
 	private final ModelPart head;
 
-	public WoodGolemModel(ModelPart root) {
+	public MiniGolemModel(ModelPart root) {
 		this.left_leg = root.getChild("left_leg");
 		this.right_leg = root.getChild("right_leg");
 		this.left_arm = root.getChild("left_arm");

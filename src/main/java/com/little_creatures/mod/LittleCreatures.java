@@ -1,6 +1,5 @@
 package com.little_creatures.mod;
 
-import com.little_creatures.mod.client.ClientModEvents;
 import com.little_creatures.mod.entity.WoodGolem;
 import com.little_creatures.mod.registry.ModEntityTypes;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
