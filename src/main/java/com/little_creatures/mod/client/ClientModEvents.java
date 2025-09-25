@@ -21,7 +21,7 @@ public class ClientModEvents {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntityTypes.WOODGOLEM.get(), ctx ->
+        event.registerEntityRenderer(ModEntityTypes.WOOD_GOLEM.get(), ctx ->
                 new MobRenderer<WoodGolem, MiniGolemModel<WoodGolem>>(
                         ctx,
                         new MiniGolemModel<>(ctx.bakeLayer(MiniGolemModel.LAYER_LOCATION)),

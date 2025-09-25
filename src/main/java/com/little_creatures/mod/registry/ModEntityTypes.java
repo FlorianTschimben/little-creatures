@@ -12,9 +12,9 @@ public class ModEntityTypes {
     public static final DeferredRegister<EntityType<?>> ENTITIES =
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, LittleCreatures.MODID);
 
-    public static final RegistryObject<EntityType<WoodGolem>> WOODGOLEM =
+    public static final RegistryObject<EntityType<WoodGolem>> WOOD_GOLEM =
             ENTITIES.register("wood_golem", () ->
                     EntityType.Builder.of(WoodGolem::new, MobCategory.CREATURE)
-                            .sized(0.6f, 1.8f) // Breite, Höhe
+                            .sized(0.5f, 0.6f)
                             .build(LittleCreatures.MODID + ":wood_golem"));
 }

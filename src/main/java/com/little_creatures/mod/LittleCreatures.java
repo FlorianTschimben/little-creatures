@@ -26,7 +26,7 @@ public class LittleCreatures
 
         @SubscribeEvent
         public static void registerAttributes(EntityAttributeCreationEvent event) {
-            event.put(ModEntityTypes.WOODGOLEM.get(), WoodGolem.createAttributes().build());
+            event.put(ModEntityTypes.WOOD_GOLEM.get(), WoodGolem.createAttributes().build());
         }
     }
 }
