@@ -22,7 +22,7 @@ public class LittleCreatures
     }
 
     @Mod.EventBusSubscriber(modid = LittleCreatures.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-    public class ModEvents {
+    public static class ModEvents {
 
         @SubscribeEvent
         public static void registerAttributes(EntityAttributeCreationEvent event) {
