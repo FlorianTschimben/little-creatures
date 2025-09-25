@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "little_creatures:item/golem_wand"
+  }
+}

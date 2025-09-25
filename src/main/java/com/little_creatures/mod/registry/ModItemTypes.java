@@ -2,6 +2,7 @@ package com.little_creatures.mod.registry;
 
 import com.little_creatures.mod.LittleCreatures;
 import com.little_creatures.mod.item.GolemHeart;
+import com.little_creatures.mod.item.GolemWand;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -14,4 +15,7 @@ public class ModItemTypes {
 
     public static final RegistryObject<Item> GOLEM_HEART = ITEMS.register("golem_heart",
             () -> new GolemHeart(new Item.Properties()));
+
+    public static final RegistryObject<Item> GOLEM_WAND = ITEMS.register("golem_wand",
+            () -> new GolemWand(new Item.Properties()));
 }

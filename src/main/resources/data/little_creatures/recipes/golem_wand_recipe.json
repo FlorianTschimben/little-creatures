@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " BB",
+    " AB",
+    "A  "
+  ],
+  "key": {
+    "A": {"item": "minecraft:stick"},
+    "B": {"item": "little_creatures:golem_heart"}
+  },
+  "result": {
+    "item": "little_creatures:golem_wand",
+    "count": 1
+  }
+}
