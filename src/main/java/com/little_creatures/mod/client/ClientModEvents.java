@@ -2,6 +2,7 @@ package com.little_creatures.mod.client;
 
 import com.little_creatures.mod.LittleCreatures;
 import com.little_creatures.mod.client.model.MiniGolemModel;
+import com.little_creatures.mod.entity.ClayGolem;
 import com.little_creatures.mod.entity.WoodGolem;
 import com.little_creatures.mod.registry.ModEntityTypes;
 import net.minecraft.client.renderer.entity.MobRenderer;
@@ -10,6 +11,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
 
 @Mod.EventBusSubscriber(modid = LittleCreatures.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
@@ -28,8 +30,19 @@ public class ClientModEvents {
                         0.5f
                 ) {
                     @Override
-                    public ResourceLocation getTextureLocation(WoodGolem entity) {
+                    public @NotNull ResourceLocation getTextureLocation(@NotNull WoodGolem entity) {
                         return new ResourceLocation(LittleCreatures.MODID, "textures/entity/wood_golem.png");
+                    }
+                });
+        event.registerEntityRenderer(ModEntityTypes.CLAY_GOLEM.get(), ctx ->
+                new MobRenderer<ClayGolem, MiniGolemModel<ClayGolem>>(
+                        ctx,
+                        new MiniGolemModel<>(ctx.bakeLayer(MiniGolemModel.LAYER_LOCATION)),
+                        0.5f
+                ) {
+                    @Override
+                    public @NotNull ResourceLocation getTextureLocation(@NotNull ClayGolem entity) {
+                        return new ResourceLocation(LittleCreatures.MODID, "textures/entity/clay_golem.png");
                     }
                 });
     }

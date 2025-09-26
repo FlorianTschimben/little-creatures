@@ -20,7 +20,7 @@ public class MiniGolem extends PathfinderMob {
 
     public MiniGolem(EntityType<? extends PathfinderMob> type, Level level, int invSlots) {
         super(type, level);
-        inventory =  new SimpleContainer(invSlots);
+        inventory = new SimpleContainer(invSlots);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -104,7 +104,7 @@ public class MiniGolem extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            return golem.getWorkState() == WorkState.DELIVERING && golem.getTargetPos() != null;
+            return golem.getWorkState() != WorkState.COLLECTING && golem.getTargetPos() != null;
         }
 
         @Override

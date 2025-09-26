@@ -1,6 +1,7 @@
 package com.little_creatures.mod.registry;
 
 import com.little_creatures.mod.LittleCreatures;
+import com.little_creatures.mod.entity.ClayGolem;
 import com.little_creatures.mod.entity.WoodGolem;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -17,4 +18,11 @@ public class ModEntityTypes {
                     EntityType.Builder.of(WoodGolem::new, MobCategory.CREATURE)
                             .sized(0.5f, 0.6f)
                             .build(LittleCreatures.MODID + ":wood_golem"));
+
+    public static final RegistryObject<EntityType<ClayGolem>> CLAY_GOLEM =
+            ENTITIES.register("clay_golem", () ->
+                    EntityType.Builder.of(ClayGolem::new, MobCategory.CREATURE)
+                            .sized(0.5f, 0.6f)
+                            .build(LittleCreatures.MODID + ":clay_golem"));
+
 }

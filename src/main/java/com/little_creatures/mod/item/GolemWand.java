@@ -54,17 +54,17 @@ public class GolemWand extends Item {
                 assert player != null;
                 MiniGolem golem = selectedGolems.get(player.getUUID());
                 if (golem != null) {
-                    if (golem.getTargetPos() == null) {
+                    if (golem.getTargetPos() == null || !(golem instanceof WoodGolem)) {
                         golem.setTargetPos(pos);
                         player.displayClientMessage(Component.literal("Output Chest assigned!"), true);
                         selectedGolems.clear();
-                    } else if (golem instanceof WoodGolem) {
+                    } else {
                         ((WoodGolem) golem).setTargetChest(pos);
                         player.displayClientMessage(Component.literal("Input Chest assigned!"), true);
                         selectedGolems.clear();
-                    } else {
-                        player.displayClientMessage(Component.literal("No Golem selected!"), true);
                     }
+                } else {
+                    player.displayClientMessage(Component.literal("No Golem selected!"), true);
                 }
                 return InteractionResult.SUCCESS;
             }
