@@ -6,6 +6,6 @@ import net.minecraft.world.level.Level;
 
 public class WoodGolem extends MiniGolem {
     public WoodGolem(EntityType<? extends PathfinderMob> type, Level level) {
-        super(type, level);
+        super(type, level, 3);
     }
 }

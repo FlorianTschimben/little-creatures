@@ -1,18 +1,24 @@
 package com.little_creatures.mod.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 public class MiniGolem extends PathfinderMob {
     private BlockPos targetPos = null;
+    private final SimpleContainer inventory;
 
-    public MiniGolem(EntityType<? extends PathfinderMob> type, Level level) {
+    public MiniGolem(EntityType<? extends PathfinderMob> type, Level level, int invSlots) {
         super(type, level);
+        inventory =  new SimpleContainer(invSlots);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -39,5 +45,29 @@ public class MiniGolem extends PathfinderMob {
             this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
             this.setNoAi(false);
         }
+    }
+
+    public SimpleContainer getInventory() {
+        return inventory;
+    }
+
+    public boolean addItem(ItemStack stack) {
+        return inventory.addItem(stack).isEmpty();
+    }
+
+    public ItemStack removeItem(int slot, int amount) {
+        return inventory.removeItem(slot, amount);
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.put("Inventory", inventory.createTag());
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        inventory.fromTag(tag.getList("Inventory", 10));
     }
 }
