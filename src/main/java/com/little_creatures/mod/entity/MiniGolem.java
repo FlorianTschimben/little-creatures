@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public class MiniGolem extends PathfinderMob {
     private BlockPos targetPos = null;
     private final SimpleContainer inventory;
+    private WorkState workState = WorkState.IDLE;
 
     public MiniGolem(EntityType<? extends PathfinderMob> type, Level level, int invSlots) {
         super(type, level);
@@ -32,7 +33,7 @@ public class MiniGolem extends PathfinderMob {
     protected void registerGoals() {
         super.registerGoals();
         MoveToBlockGoal moveToBlockGoal = new MoveToBlockGoal(this);
-        this.goalSelector.addGoal(1, moveToBlockGoal);
+        this.goalSelector.addGoal(2, moveToBlockGoal);
     }
 
     public BlockPos getTargetPos() {
@@ -50,10 +51,20 @@ public class MiniGolem extends PathfinderMob {
 
     public void resetAllPos() {
         setTargetPos(null);
+        setWorkState(WorkState.IDLE);
     }
 
     public SimpleContainer getInventory() {
         return inventory;
+    }
+
+    public boolean isInventoryFull() {
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            if (inventory.getItem(i).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean addItem(ItemStack stack) {
@@ -62,6 +73,14 @@ public class MiniGolem extends PathfinderMob {
 
     public ItemStack removeItem(int slot, int amount) {
         return inventory.removeItem(slot, amount);
+    }
+
+    public WorkState getWorkState() {
+        return workState;
+    }
+
+    public void setWorkState(WorkState state) {
+        this.workState = state;
     }
 
     @Override
@@ -85,24 +104,55 @@ public class MiniGolem extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            return golem.getTargetPos() != null;
+            return golem.getWorkState() == WorkState.DELIVERING && golem.getTargetPos() != null;
         }
 
         @Override
         public void tick() {
             BlockPos target = golem.getTargetPos();
             if (target != null) {
-                golem.getNavigation().moveTo(
-                        target.getX() + 0.5,
-                        target.getY() + 1,
-                        target.getZ() + 0.5,
-                        1.0
-                );
-            } else {
-                golem.getNavigation().stop();
-                golem.setDeltaMovement(0, golem.getDeltaMovement().y, 0);
-                golem.setNoAi(false);
+                golem.getNavigation().moveTo(target.getX() + 0.5, target.getY() + 1, target.getZ() + 0.5, 1.0);
+                if (golem.distanceToSqr(target.getX() + 0.5, target.getY() + 1, target.getZ() + 0.5) < 2.0) {
+                    if (golem.level().getBlockEntity(target) instanceof net.minecraft.world.Container chest) {
+                        for (int i = 0; i < golem.getInventory().getContainerSize(); i++) {
+                            ItemStack stack = golem.getInventory().getItem(i);
+                            if (!stack.isEmpty()) {
+                                ItemStack remaining = stack.copy();
+                                for (int j = 0; j < chest.getContainerSize(); j++) {
+                                    ItemStack chestStack = chest.getItem(j);
+                                    if (chestStack.isEmpty()) {
+                                        chest.setItem(j, remaining);
+                                        remaining = ItemStack.EMPTY;
+                                        break;
+                                    }
+                                    if (ItemStack.isSameItemSameTags(chestStack, remaining)) {
+                                        int maxStackSize = Math.min(chest.getMaxStackSize(), chestStack.getMaxStackSize());
+                                        int space = maxStackSize - chestStack.getCount();
+                                        if (space > 0) {
+                                            int moveAmount = Math.min(space, remaining.getCount());
+                                            chestStack.grow(moveAmount);
+                                            remaining.shrink(moveAmount);
+                                            if (remaining.isEmpty()) break;
+                                        }
+                                    }
+                                }
+                                golem.getInventory().setItem(i, remaining);
+                                chest.setChanged();
+                                if (remaining.isEmpty()) golem.setWorkState(WorkState.COLLECTING);
+                            }
+                        }
+                        if (golem.getInventory().isEmpty()) {
+                            golem.setWorkState(WorkState.COLLECTING);
+                        }
+                    }
+                }
             }
         }
+    }
+
+    public enum WorkState {
+        COLLECTING,
+        DELIVERING,
+        IDLE
     }
 }

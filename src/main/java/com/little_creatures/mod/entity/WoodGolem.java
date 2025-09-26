@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +19,7 @@ public class WoodGolem extends MiniGolem {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(2, new MoveToTargetChestGoal(this));
+        this.goalSelector.addGoal(1, new MoveToTargetChestGoal(this));
     }
 
     public BlockPos getTargetChest() {
@@ -70,23 +71,55 @@ public class WoodGolem extends MiniGolem {
 
         @Override
         public boolean canUse() {
-            return golem.getTargetChest() != null;
+            if (golem.getWorkState() == WorkState.DELIVERING) return false;
+            if (golem.getTargetChest() == null || golem.isInventoryFull()) return false;
+            BlockPos chestPos = golem.getTargetChest();
+            if (golem.level().getBlockEntity(chestPos) instanceof net.minecraft.world.Container chest) {
+                for (int i = 0; i < chest.getContainerSize(); i++) {
+                    if (!chest.getItem(i).isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+            golem.setWorkState(WorkState.DELIVERING);
+            return false;
         }
 
         @Override
         public void tick() {
             BlockPos target = golem.getTargetChest();
             if (target != null) {
+                golem.setWorkState(WorkState.COLLECTING);
                 golem.getNavigation().moveTo(
                         target.getX() + 0.5,
                         target.getY() + 1,
                         target.getZ() + 0.5,
                         1.0
                 );
-            } else {
-                golem.getNavigation().stop();
-                golem.setDeltaMovement(0, golem.getDeltaMovement().y, 0);
-                golem.setNoAi(false);
+                // Wenn nahe genug -> Items ziehen
+                if (golem.distanceToSqr(
+                        target.getX() + 0.5,
+                        target.getY() + 1,
+                        target.getZ() + 0.5
+                ) < 2.0) {
+
+                    if (golem.level().getBlockEntity(target) instanceof net.minecraft.world.Container chest) {
+                        for (int i = 0; i < chest.getContainerSize(); i++) {
+                            ItemStack stack = chest.getItem(i);
+                            if (!stack.isEmpty()) {
+                                ItemStack copy = stack.copy();
+                                if (golem.addItem(copy)) {
+                                    chest.setItem(i, ItemStack.EMPTY);
+                                    chest.setChanged();
+                                    if (golem.isInventoryFull()) {
+                                        golem.setWorkState(WorkState.DELIVERING);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
