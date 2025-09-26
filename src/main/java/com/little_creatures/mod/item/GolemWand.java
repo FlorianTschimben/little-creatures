@@ -29,9 +29,9 @@ public class GolemWand extends Item {
     @Override
     public @NotNull InteractionResult interactLivingEntity(
             @NotNull ItemStack stack, @NotNull Player player, @NotNull LivingEntity entity, @NotNull InteractionHand hand) {
-        if (entity instanceof WoodGolem golem) {
+        if (entity instanceof MiniGolem golem) {
             if (player.isShiftKeyDown()) {
-                golem.setTargetPos(null);
+                golem.resetAllPos();
                 player.displayClientMessage(Component.literal(golem.getName().getString() + " target cleared"), true);
             } else {
                 selectedGolems.put(player.getUUID(), golem);
@@ -54,11 +54,17 @@ public class GolemWand extends Item {
                 assert player != null;
                 MiniGolem golem = selectedGolems.get(player.getUUID());
                 if (golem != null) {
-                    golem.setTargetPos(pos);
-                    player.displayClientMessage(Component.literal("Chest assigned!"), true);
-                    selectedGolems.clear();
-                } else {
-                    player.displayClientMessage(Component.literal("No Golem selected!"), true);
+                    if (golem.getTargetPos() == null) {
+                        golem.setTargetPos(pos);
+                        player.displayClientMessage(Component.literal("Output Chest assigned!"), true);
+                        selectedGolems.clear();
+                    } else if (golem instanceof WoodGolem) {
+                        ((WoodGolem) golem).setTargetChest(pos);
+                        player.displayClientMessage(Component.literal("Input Chest assigned!"), true);
+                        selectedGolems.clear();
+                    } else {
+                        player.displayClientMessage(Component.literal("No Golem selected!"), true);
+                    }
                 }
                 return InteractionResult.SUCCESS;
             }

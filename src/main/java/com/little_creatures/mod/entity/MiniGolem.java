@@ -8,6 +8,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +48,10 @@ public class MiniGolem extends PathfinderMob {
         }
     }
 
+    public void resetAllPos() {
+        setTargetPos(null);
+    }
+
     public SimpleContainer getInventory() {
         return inventory;
     }
@@ -69,5 +74,35 @@ public class MiniGolem extends PathfinderMob {
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         inventory.fromTag(tag.getList("Inventory", 10));
+    }
+
+    public static class MoveToBlockGoal extends Goal {
+        private final MiniGolem golem;
+
+        public MoveToBlockGoal(MiniGolem golem) {
+            this.golem = golem;
+        }
+
+        @Override
+        public boolean canUse() {
+            return golem.getTargetPos() != null;
+        }
+
+        @Override
+        public void tick() {
+            BlockPos target = golem.getTargetPos();
+            if (target != null) {
+                golem.getNavigation().moveTo(
+                        target.getX() + 0.5,
+                        target.getY() + 1,
+                        target.getZ() + 0.5,
+                        1.0
+                );
+            } else {
+                golem.getNavigation().stop();
+                golem.setDeltaMovement(0, golem.getDeltaMovement().y, 0);
+                golem.setNoAi(false);
+            }
+        }
     }
 }
