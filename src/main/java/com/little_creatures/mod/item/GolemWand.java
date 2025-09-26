@@ -14,6 +14,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,17 +27,23 @@ public class GolemWand extends Item {
     }
 
     @Override
-    public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity entity, InteractionHand hand) {
+    public @NotNull InteractionResult interactLivingEntity(
+            @NotNull ItemStack stack, @NotNull Player player, @NotNull LivingEntity entity, @NotNull InteractionHand hand) {
         if (entity instanceof WoodGolem golem) {
-            selectedGolems.put(player.getUUID(), golem);
-            player.displayClientMessage(Component.literal("Golem ausgewählt!"), true);
+            if (player.isShiftKeyDown()) {
+                golem.setTargetPos(null);
+                player.displayClientMessage(Component.literal(golem.getName().getString() + " target cleared"), true);
+            } else {
+                selectedGolems.put(player.getUUID(), golem);
+                player.displayClientMessage(Component.literal(golem.getName().getString()+" selected"), true);
+            }
             return InteractionResult.SUCCESS;
         }
         return super.interactLivingEntity(stack, player, entity, hand);
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context) {
+    public @NotNull InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
         Player player = context.getPlayer();
         BlockPos pos = context.getClickedPos();
@@ -44,12 +51,14 @@ public class GolemWand extends Item {
         if (!level.isClientSide) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof ChestBlockEntity chest) {
+                assert player != null;
                 MiniGolem golem = selectedGolems.get(player.getUUID());
                 if (golem != null) {
-                    golem.setTarget_pos(pos);
-                    player.displayClientMessage(Component.literal("Golem läuft zur Chest!"), true);
+                    golem.setTargetPos(pos);
+                    player.displayClientMessage(Component.literal("Chest assigned!"), true);
+                    selectedGolems.clear();
                 } else {
-                    player.displayClientMessage(Component.literal("Kein Golem ausgewählt!"), true);
+                    player.displayClientMessage(Component.literal("No Golem selected!"), true);
                 }
                 return InteractionResult.SUCCESS;
             }

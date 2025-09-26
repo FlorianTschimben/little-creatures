@@ -9,8 +9,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 
 public class MiniGolem extends PathfinderMob {
-    private BlockPos target_pos = null;
-    private MoveToBlockGoal moveToBlockGoal = null;
+    private BlockPos targetPos = null;
+
     public MiniGolem(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
     }
@@ -24,15 +24,20 @@ public class MiniGolem extends PathfinderMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        moveToBlockGoal = new MoveToBlockGoal(this);
+        MoveToBlockGoal moveToBlockGoal = new MoveToBlockGoal(this);
         this.goalSelector.addGoal(1, moveToBlockGoal);
     }
 
-    public BlockPos getTarget_pos() {
-        return this.target_pos;
+    public BlockPos getTargetPos() {
+        return this.targetPos;
     }
 
-    public void setTarget_pos(BlockPos b) {
-        this.target_pos = b;
+    public void setTargetPos(BlockPos b) {
+        this.targetPos = b;
+        if (targetPos == null) {
+            this.getNavigation().stop();
+            this.setDeltaMovement(0, this.getDeltaMovement().y, 0);
+            this.setNoAi(false);
+        }
     }
 }
