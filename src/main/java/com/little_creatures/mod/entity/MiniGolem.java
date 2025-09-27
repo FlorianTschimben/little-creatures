@@ -87,12 +87,20 @@ public class MiniGolem extends PathfinderMob {
     public void addAdditionalSaveData(@NotNull CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.put("Inventory", inventory.createTag());
+        tag.putInt("TargetPosX", targetPos.getX());
+        tag.putInt("TargetPosY", targetPos.getY());
+        tag.putInt("TargetPosZ", targetPos.getZ());
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         inventory.fromTag(tag.getList("Inventory", 10));
+        targetPos = new BlockPos(
+                tag.getInt("TargetPosX"),
+                tag.getInt("TargetPosY"),
+                tag.getInt("TargetPosZ")
+        );
     }
 
     public static class MoveToBlockGoal extends Goal {
