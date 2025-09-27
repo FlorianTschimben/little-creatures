@@ -8,6 +8,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CropBlock;
 
 import java.util.EnumSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DirtGolem extends MiniGolem {
 
@@ -24,8 +26,12 @@ public class DirtGolem extends MiniGolem {
     public static class HarvestCropsGoal extends Goal {
         private final DirtGolem golem;
         private final int radius;
-        private BlockPos harvestTarget = null;
+        private List<BlockPos> harvestArea;
+        private int currentIndex = 0;
+        private BlockPos currentTarget = null;
         private int stuckTicks = 0;
+        private BlockPos lastCenter;
+        private boolean forwardDirection = true; // True: vorwärts, False: rückwärts
 
         public HarvestCropsGoal(DirtGolem golem, int radius) {
             this.golem = golem;
@@ -44,72 +50,147 @@ public class DirtGolem extends MiniGolem {
         }
 
         @Override
+        public void start() {
+            // Reset beim Start des Goals
+            harvestArea = null;
+            currentIndex = 0;
+            currentTarget = null;
+            stuckTicks = 0;
+            lastCenter = null;
+            forwardDirection = true;
+        }
+
+        @Override
         public void tick() {
             Level level = golem.level();
             BlockPos center = golem.getTargetPos();
 
-            if (harvestTarget == null) {
-                harvestTarget = findNearestCrop(level, center);
-                stuckTicks = 0;
+            if (center == null) return;
+
+            // Überprüfe ob sich die Center-Position geändert hat
+            if (lastCenter == null || !lastCenter.equals(center)) {
+                harvestArea = null;
+                lastCenter = center;
             }
 
-            if (harvestTarget != null) {
-                // zum Feld bewegen
-                golem.getNavigation().moveTo(
-                        harvestTarget.getX() + 0.5,
-                        harvestTarget.getY(),
-                        harvestTarget.getZ() + 0.5,
-                        1.0
-                );
+            // Initialisiere Erntebereich falls nötig
+            if (harvestArea == null) {
+                harvestArea = createHarvestArea(level, center);
+                currentIndex = 0;
+                currentTarget = null;
+                forwardDirection = true;
+            }
 
-                // Check ob nah genug zum Abbauen
-                if (golem.distanceToSqr(harvestTarget.getX() + 0.5,
-                        harvestTarget.getY(),
-                        harvestTarget.getZ() + 0.5) < 2.0) {
+            // Wenn Bereich leer, warte kurz und reset
+            if (harvestArea.isEmpty()) {
+                harvestArea = null;
+                return;
+            }
 
-                    if (level.getBlockState(harvestTarget).getBlock() instanceof CropBlock crop) {
-                        if (crop.isMaxAge(level.getBlockState(harvestTarget))) {
-                            level.destroyBlock(harvestTarget, true, golem);
-                            level.setBlock(harvestTarget, crop.defaultBlockState(), 3);
-                        }
-                    }
+            // Finde nächsten validen Target-Block
+            if (currentTarget == null) {
+                currentTarget = findNextCrop(level);
+                stuckTicks = 0;
 
-                    harvestTarget = findNearestCrop(level, center);
+                if (currentTarget == null) {
+                    // Keine weiteren reifen Crops gefunden, reset für nächsten Durchlauf
+                    harvestArea = null;
+                    return;
+                }
+            }
+
+            // Bewege dich zum aktuellen Target
+            golem.getNavigation().moveTo(
+                    currentTarget.getX() + 0.5,
+                    currentTarget.getY(),
+                    currentTarget.getZ() + 0.5,
+                    1.0
+            );
+
+            // Überprüfe ob nah genug zum Ernten
+            if (golem.distanceToSqr(
+                    currentTarget.getX() + 0.5,
+                    currentTarget.getY(),
+                    currentTarget.getZ() + 0.5) < 2.0) {
+
+                harvestCrop(level, currentTarget);
+                currentTarget = null; // Nächsten Crop suchen
+                stuckTicks = 0;
+
+            } else {
+                // Stuck-Erkennung
+                if (stuckTicks++ > 40) { // 2 Sekunden
+                    // Überspringe diesen Block und gehe zum nächsten
+                    currentIndex = getNextIndex();
+                    currentTarget = null;
                     stuckTicks = 0;
-                } else {
-                    stuckTicks++;
-                    if (stuckTicks > 20) { // 1 Sekunde
-                        harvestTarget = null;
-                        stuckTicks = 0;
-                    }
                 }
             }
         }
 
         /**
-         * Suche das nächstgelegene reife Feld
+         * Erstellt den Erntebereich in Schlangenlinien-Form (hin und her)
          */
-        private BlockPos findNearestCrop(Level level, BlockPos center) {
-            BlockPos nearest = null;
-            double nearestDist = Double.MAX_VALUE;
-            for (BlockPos pos : BlockPos.betweenClosed(
-                    center.offset(-radius, -1, -radius),
-                    center.offset(radius, 1, radius))) {
-                if (level.getBlockState(pos).getBlock() instanceof CropBlock crop) {
-                    if (crop.isMaxAge(level.getBlockState(pos))) {
-                        double dist = golem.distanceToSqr(
-                                pos.getX() + 0.5,
-                                pos.getY() + 0.5,
-                                pos.getZ() + 0.5
-                        );
-                        if (dist < nearestDist) {
-                            nearestDist = dist;
-                            nearest = pos.immutable();
+        private List<BlockPos> createHarvestArea(Level level, BlockPos center) {
+            List<BlockPos> area = new ArrayList<>();
+
+            // Erstelle eine geordnete Liste von Positionen im Schlangenmuster
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -radius; z <= radius; z++) {
+                    // Entscheide die Richtung basierend auf der z-Position
+                    // Gerade z-Reihen: von links nach rechts, ungerade: von rechts nach links
+                    if (z % 2 == 0) {
+                        // Vorwärts: von -radius bis radius auf x-Achse
+                        for (int x = -radius; x <= radius; x++) {
+                            BlockPos pos = center.offset(x, y, z).immutable();
+                            area.add(pos);
+                        }
+                    } else {
+                        // Rückwärts: von radius bis -radius auf x-Achse
+                        for (int x = radius; x >= -radius; x--) {
+                            BlockPos pos = center.offset(x, y, z).immutable();
+                            area.add(pos);
                         }
                     }
                 }
             }
-            return nearest;
+            return area;
+        }
+
+        /**
+         * Sucht den nächsten reifen Crop in der vordefinierten Reihenfolge
+         */
+        private BlockPos findNextCrop(Level level) {
+            while (currentIndex < harvestArea.size()) {
+                BlockPos pos = harvestArea.get(currentIndex);
+                currentIndex = getNextIndex();
+
+                if (level.getBlockState(pos).getBlock() instanceof CropBlock crop) {
+                    if (crop.isMaxAge(level.getBlockState(pos))) {
+                        return pos;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Gibt den nächsten Index in der Reihenfolge zurück
+         */
+        private int getNextIndex() {
+            return currentIndex + 1;
+        }
+
+        /**
+         * Erntet und replanted einen Crop
+         */
+        private void harvestCrop(Level level, BlockPos pos) {
+            if (level.getBlockState(pos).getBlock() instanceof CropBlock crop) {
+                if (crop.isMaxAge(level.getBlockState(pos))) {
+                    level.destroyBlock(pos, true, golem);
+                    level.setBlock(pos, crop.defaultBlockState(), 3);
+                }
+            }
         }
     }
 }
