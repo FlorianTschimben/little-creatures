@@ -1,6 +1,7 @@
 package com.little_creatures.mod;
 
 import com.little_creatures.mod.entity.ClayGolem;
+import com.little_creatures.mod.entity.DirtGolem;
 import com.little_creatures.mod.entity.WoodGolem;
 import com.little_creatures.mod.registry.ModEntityTypes;
 import com.little_creatures.mod.registry.ModItemTypes;
@@ -29,6 +30,7 @@ public class LittleCreatures
         public static void registerAttributes(EntityAttributeCreationEvent event) {
             event.put(ModEntityTypes.WOOD_GOLEM.get(), WoodGolem.createAttributes().build());
             event.put(ModEntityTypes.CLAY_GOLEM.get(), ClayGolem.createAttributes().build());
+            event.put(ModEntityTypes.DIRT_GOLEM.get(), DirtGolem.createAttributes().build());
         }
     }
 }
