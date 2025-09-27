@@ -89,7 +89,7 @@ public class WoodGolem extends MiniGolem {
         public void tick() {
             BlockPos target = golem.getTargetChest();
             if (target != null) {
-                golem.setWorkState(WorkState.COLLECTING);
+                golem.setWorkState(WorkState.WORKING);
                 golem.getNavigation().moveTo(
                         target.getX() + 0.5,
                         target.getY() + 1,

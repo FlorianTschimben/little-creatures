@@ -104,7 +104,7 @@ public class MiniGolem extends PathfinderMob {
 
         @Override
         public boolean canUse() {
-            return golem.getWorkState() != WorkState.COLLECTING && golem.getTargetPos() != null;
+            return golem.getWorkState() != WorkState.WORKING && golem.getTargetPos() != null;
         }
 
         @Override
@@ -138,11 +138,11 @@ public class MiniGolem extends PathfinderMob {
                                 }
                                 golem.getInventory().setItem(i, remaining);
                                 chest.setChanged();
-                                if (remaining.isEmpty()) golem.setWorkState(WorkState.COLLECTING);
+                                if (remaining.isEmpty()) golem.setWorkState(WorkState.WORKING);
                             }
                         }
                         if (golem.getInventory().isEmpty()) {
-                            golem.setWorkState(WorkState.COLLECTING);
+                            golem.setWorkState(WorkState.WORKING);
                         }
                     }
                 }
@@ -151,7 +151,7 @@ public class MiniGolem extends PathfinderMob {
     }
 
     public enum WorkState {
-        COLLECTING,
+        WORKING,
         DELIVERING,
         IDLE
     }

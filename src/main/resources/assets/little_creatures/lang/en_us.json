@@ -2,5 +2,6 @@
   "item.little_creatures.golem_heart": "Golem Heart",
   "item.little_creatures.golem_wand": "Golem Wand",
   "entity.little_creatures.wood_golem": "Wood Golem",
-  "entity.little_creatures.clay_golem": "Clay Golem"
+  "entity.little_creatures.clay_golem": "Clay Golem",
+  "entity.little_creatures.dirt_golem": "Dirt Golem"
 }

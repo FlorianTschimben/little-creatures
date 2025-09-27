@@ -31,7 +31,6 @@ public class DirtGolem extends MiniGolem {
         private BlockPos currentTarget = null;
         private int stuckTicks = 0;
         private BlockPos lastCenter;
-        private boolean forwardDirection = true; // True: vorwärts, False: rückwärts
 
         public HarvestCropsGoal(DirtGolem golem, int radius) {
             this.golem = golem;
@@ -51,13 +50,11 @@ public class DirtGolem extends MiniGolem {
 
         @Override
         public void start() {
-            // Reset beim Start des Goals
             harvestArea = null;
             currentIndex = 0;
             currentTarget = null;
             stuckTicks = 0;
             lastCenter = null;
-            forwardDirection = true;
         }
 
         @Override
@@ -76,11 +73,11 @@ public class DirtGolem extends MiniGolem {
                 harvestArea = createHarvestArea(center);
                 currentIndex = 0;
                 currentTarget = null;
-                forwardDirection = true;
             }
 
             if (harvestArea.isEmpty()) {
                 harvestArea = null;
+                golem.setWorkState(WorkState.IDLE);
                 return;
             }
 
@@ -90,10 +87,11 @@ public class DirtGolem extends MiniGolem {
 
                 if (currentTarget == null) {
                     harvestArea = null;
+                    golem.setWorkState(WorkState.IDLE);
                     return;
                 }
             }
-
+            golem.setWorkState(WorkState.WORKING);
             golem.getNavigation().moveTo(
                     currentTarget.getX() + 0.5,
                     currentTarget.getY(),
