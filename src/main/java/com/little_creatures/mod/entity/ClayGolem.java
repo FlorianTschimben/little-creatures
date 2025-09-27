@@ -8,6 +8,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -24,7 +25,10 @@ public class ClayGolem extends MiniGolem{
 
     public static class CollectItemsGoal extends Goal {
         private final MiniGolem golem;
-        private ItemEntity currentTarget = null;
+        private List<ItemEntity> itemQueue = new ArrayList<>();
+        private int currentIndex = 0;
+        private int stuckTicks = 0;
+        private double lastDist = Double.MAX_VALUE;
 
         public CollectItemsGoal(MiniGolem golem) {
             this.golem = golem;
@@ -38,60 +42,80 @@ public class ClayGolem extends MiniGolem{
         }
 
         @Override
+        public void start() {
+            refillQueue();
+            currentIndex = 0;
+            stuckTicks = 0;
+            lastDist = Double.MAX_VALUE;
+        }
+
+        @Override
         public void tick() {
             BlockPos chestPos = golem.getTargetPos();
             if (chestPos == null) return;
+
             if (golem.isInventoryFull()) {
                 golem.setWorkState(WorkState.DELIVERING);
                 return;
             }
-            if (currentTarget == null || !currentTarget.isAlive() || currentTarget.getItem().isEmpty()) {
-                currentTarget = findNearestItem(chestPos);
-                if (currentTarget == null) {
-                    if (findNearestItem(chestPos) == null) {
-                        golem.setWorkState(MiniGolem.WorkState.DELIVERING);
-                    }
-                    return;
-                }
+
+            if (itemQueue.isEmpty() || currentIndex >= itemQueue.size()) {
+                golem.setWorkState(WorkState.DELIVERING);
+                return;
             }
+
+            ItemEntity currentTarget = itemQueue.get(currentIndex);
+
+            if (currentTarget == null || !currentTarget.isAlive() || currentTarget.getItem().isEmpty()) {
+                currentIndex++;
+                stuckTicks = 0;
+                lastDist = Double.MAX_VALUE;
+                return;
+            }
+
             golem.getNavigation().moveTo(currentTarget, 1.0);
-            if (golem.distanceTo(currentTarget) < 1.5) {
-                ItemEntity item = currentTarget;
-                ItemStack stack = item.getItem().copy();
+
+            double dist = golem.distanceToSqr(currentTarget);
+
+            if (dist < 3.0) {
+                ItemStack stack = currentTarget.getItem().copy();
                 ItemStack remaining = golem.getInventory().addItem(stack);
+
                 if (remaining.isEmpty()) {
-                    item.discard();
+                    currentTarget.discard();
                 } else {
-                    item.setItem(remaining);
+                    currentTarget.setItem(remaining);
                 }
-                currentTarget = null;
+
+                currentIndex++;
+                stuckTicks = 0;
+                lastDist = Double.MAX_VALUE;
+                return;
+            }
+            if (dist >= lastDist - 0.1) stuckTicks++;
+            else stuckTicks = 0;
+            lastDist = dist;
+
+            if (stuckTicks > 20) {
+                currentIndex++;
+                stuckTicks = 0;
+                lastDist = Double.MAX_VALUE;
             }
         }
 
+        private void refillQueue() {
+            BlockPos chestPos = golem.getTargetPos();
+            if (chestPos == null) return;
 
-        private ItemEntity findNearestItem(BlockPos chestPos) {
-            double radius = 4;
-            List<ItemEntity> items = golem.level().getEntitiesOfClass(
+            double radius = 5;
+            itemQueue = golem.level().getEntitiesOfClass(
                     ItemEntity.class,
                     new net.minecraft.world.phys.AABB(
                             chestPos.getX() - radius, chestPos.getY() - 2, chestPos.getZ() - radius,
                             chestPos.getX() + radius, chestPos.getY() + 2, chestPos.getZ() + radius
                     )
             );
-
-            ItemEntity nearest = null;
-            double nearestDist = Double.MAX_VALUE;
-
-            for (ItemEntity item : items) {
-                if (!item.isAlive() || item.getItem().isEmpty()) continue;
-                double dist = golem.distanceToSqr(item);
-                if (dist < nearestDist) {
-                    nearest = item;
-                    nearestDist = dist;
-                }
-            }
-
-            return nearest;
         }
     }
+
 }
