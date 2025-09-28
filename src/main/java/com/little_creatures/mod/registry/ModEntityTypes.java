@@ -1,10 +1,7 @@
 package com.little_creatures.mod.registry;
 
 import com.little_creatures.mod.LittleCreatures;
-import com.little_creatures.mod.entity.ClayGolem;
-import com.little_creatures.mod.entity.DiamondOreGolem;
-import com.little_creatures.mod.entity.DirtGolem;
-import com.little_creatures.mod.entity.WoodGolem;
+import com.little_creatures.mod.entity.*;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.registries.DeferredRegister;
@@ -38,4 +35,10 @@ public class ModEntityTypes {
                     EntityType.Builder.of(DiamondOreGolem::new, MobCategory.CREATURE)
                             .sized(0.5f, 0.6f)
                             .build(LittleCreatures.MODID + ":diamond_ore_golem"));
+
+    public static final RegistryObject<EntityType<CraftingTableGolem>> CRAFTING_TABLE_GOLEM =
+            ENTITIES.register("crafting_table_golem", () ->
+                    EntityType.Builder.of(CraftingTableGolem::new, MobCategory.CREATURE)
+                            .sized(0.5f, 0.6f)
+                            .build(LittleCreatures.MODID + ":crafting_table_golem"));
 }

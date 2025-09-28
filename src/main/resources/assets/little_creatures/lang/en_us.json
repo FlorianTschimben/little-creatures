@@ -4,5 +4,6 @@
   "entity.little_creatures.wood_golem": "Wood Golem",
   "entity.little_creatures.clay_golem": "Clay Golem",
   "entity.little_creatures.dirt_golem": "Dirt Golem",
-  "entity.little_creatures.diamond_ore_golem": "Diamond Ore Golem"
+  "entity.little_creatures.diamond_ore_golem": "Diamond Ore Golem",
+  "entity.little_creatures.crafting_table_golem": "Crafting Table Golem"
 }

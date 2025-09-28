@@ -66,5 +66,16 @@ public class ClientModEvents {
                         return new ResourceLocation(LittleCreatures.MODID, "textures/entity/diamond_ore_golem.png");
                     }
                 });
+        event.registerEntityRenderer(ModEntityTypes.CRAFTING_TABLE_GOLEM.get(), ctx ->
+                new MobRenderer<CraftingTableGolem, MiniGolemModel<CraftingTableGolem>>(
+                        ctx,
+                        new MiniGolemModel<>(ctx.bakeLayer(MiniGolemModel.LAYER_LOCATION)),
+                        0.5f
+                ) {
+                    @Override
+                    public @NotNull ResourceLocation getTextureLocation(@NotNull CraftingTableGolem entity) {
+                        return new ResourceLocation(LittleCreatures.MODID, "textures/entity/crafting_table_golem.png");
+                    }
+                });
     }
 }
