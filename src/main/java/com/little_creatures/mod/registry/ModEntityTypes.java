@@ -2,6 +2,7 @@ package com.little_creatures.mod.registry;
 
 import com.little_creatures.mod.LittleCreatures;
 import com.little_creatures.mod.entity.ClayGolem;
+import com.little_creatures.mod.entity.DiamondOreGolem;
 import com.little_creatures.mod.entity.DirtGolem;
 import com.little_creatures.mod.entity.WoodGolem;
 import net.minecraft.world.entity.EntityType;
@@ -32,4 +33,9 @@ public class ModEntityTypes {
                             .sized(0.5f, 0.6f)
                             .build(LittleCreatures.MODID + ":dirt_golem"));
 
+    public static final RegistryObject<EntityType<DiamondOreGolem>> DIAMOND_ORE_GOLEM =
+            ENTITIES.register("diamond_ore_golem", () ->
+                    EntityType.Builder.of(DiamondOreGolem::new, MobCategory.CREATURE)
+                            .sized(0.5f, 0.6f)
+                            .build(LittleCreatures.MODID + ":diamond_ore_golem"));
 }

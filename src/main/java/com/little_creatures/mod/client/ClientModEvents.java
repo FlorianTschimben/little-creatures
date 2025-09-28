@@ -2,10 +2,7 @@ package com.little_creatures.mod.client;
 
 import com.little_creatures.mod.LittleCreatures;
 import com.little_creatures.mod.client.model.MiniGolemModel;
-import com.little_creatures.mod.entity.ClayGolem;
-import com.little_creatures.mod.entity.DirtGolem;
-import com.little_creatures.mod.entity.MiniGolem;
-import com.little_creatures.mod.entity.WoodGolem;
+import com.little_creatures.mod.entity.*;
 import com.little_creatures.mod.registry.ModEntityTypes;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -56,6 +53,17 @@ public class ClientModEvents {
                     @Override
                     public @NotNull ResourceLocation getTextureLocation(@NotNull DirtGolem entity) {
                         return new ResourceLocation(LittleCreatures.MODID, "textures/entity/dirt_golem.png");
+                    }
+                });
+        event.registerEntityRenderer(ModEntityTypes.DIAMOND_ORE_GOLEM.get(), ctx ->
+                new MobRenderer<DiamondOreGolem, MiniGolemModel<DiamondOreGolem>>(
+                        ctx,
+                        new MiniGolemModel<>(ctx.bakeLayer(MiniGolemModel.LAYER_LOCATION)),
+                        0.5f
+                ) {
+                    @Override
+                    public @NotNull ResourceLocation getTextureLocation(@NotNull DiamondOreGolem entity) {
+                        return new ResourceLocation(LittleCreatures.MODID, "textures/entity/diamond_ore_golem.png");
                     }
                 });
     }
