@@ -12,7 +12,7 @@ import java.util.Random;
 public class DiamondOreGolem extends MiniGolem {
 
     private static final Map<ItemStack, Double> ORE_WEIGHTS = new HashMap<>();
-    private static final double TOTAL_WEIGHT;
+    private static double TOTAL_WEIGHT;
     private static final Random RANDOM = new Random();
     private static final int productionCooldown = 200;
 
@@ -36,6 +36,13 @@ public class DiamondOreGolem extends MiniGolem {
 
     public DiamondOreGolem(EntityType<? extends MiniGolem> type, Level level) {
         super(type, level, 9);
+    }
+
+    @Override
+    public void resetAllPos() {
+        super.resetAllPos();
+        ORE_WEIGHTS.clear();
+        TOTAL_WEIGHT = 0;
     }
 
     @Override
