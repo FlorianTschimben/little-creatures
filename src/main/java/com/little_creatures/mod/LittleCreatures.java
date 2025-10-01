@@ -31,6 +31,7 @@ public class LittleCreatures
             event.put(ModEntityTypes.DIRT_GOLEM.get(), DirtGolem.createAttributes().build());
             event.put(ModEntityTypes.DIAMOND_ORE_GOLEM.get(), DiamondOreGolem.createAttributes().build());
             event.put(ModEntityTypes.CRAFTING_TABLE_GOLEM.get(), CraftingTableGolem.createAttributes().build());
+            event.put(ModEntityTypes.OBSIDIAN_GOLEM.get(), ObsidianGolem.createAttributes().build());
         }
     }
 }

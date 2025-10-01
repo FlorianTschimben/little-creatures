@@ -77,5 +77,16 @@ public class ClientModEvents {
                         return new ResourceLocation(LittleCreatures.MODID, "textures/entity/crafting_table_golem.png");
                     }
                 });
+        event.registerEntityRenderer(ModEntityTypes.OBSIDIAN_GOLEM.get(), ctx ->
+                new MobRenderer<ObsidianGolem, MiniGolemModel<ObsidianGolem>>(
+                        ctx,
+                        new MiniGolemModel<>(ctx.bakeLayer(MiniGolemModel.LAYER_LOCATION)),
+                        0.5f
+                ) {
+                    @Override
+                    public @NotNull ResourceLocation getTextureLocation(@NotNull ObsidianGolem entity) {
+                        return new ResourceLocation(LittleCreatures.MODID, "textures/entity/obsidian_golem.png");
+                    }
+                });
     }
 }

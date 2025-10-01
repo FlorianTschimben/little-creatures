@@ -41,4 +41,10 @@ public class ModEntityTypes {
                     EntityType.Builder.of(CraftingTableGolem::new, MobCategory.CREATURE)
                             .sized(0.5f, 0.6f)
                             .build(LittleCreatures.MODID + ":crafting_table_golem"));
+
+    public static final RegistryObject<EntityType<ObsidianGolem>> OBSIDIAN_GOLEM =
+            ENTITIES.register("obsidian_golem", () ->
+                    EntityType.Builder.of(ObsidianGolem::new, MobCategory.CREATURE)
+                            .sized(0.5f, 0.6f)
+                            .build(LittleCreatures.MODID + ":obsidian_golem"));
 }
