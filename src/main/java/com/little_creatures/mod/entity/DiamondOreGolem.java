@@ -20,9 +20,11 @@ public class DiamondOreGolem extends MiniGolem {
     private static double TOTAL_WEIGHT;
     private static final Random RANDOM = new Random();
     private static final int productionCooldown = 200;
+    private static volatile boolean initialized = false;
 
     // Default weights for vanilla ores
     private static final Map<Item, Double> DEFAULT_ORE_WEIGHTS = new HashMap<>();
+    private static final double MODDED_ORE_DEFAULT_WEIGHT = 15.0;
     
     static {
         // Default weights for vanilla ores
@@ -46,24 +48,32 @@ public class DiamondOreGolem extends MiniGolem {
      * This allows modded ores to be automatically included.
      */
     private void initializeOreWeights() {
-        if (!ORE_WEIGHTS.isEmpty()) {
+        if (initialized) {
             return; // Already initialized
         }
         
-        // Create tags for raw materials and ores
-        TagKey<Item> forgeRawMaterialsTag = ItemTags.create(new ResourceLocation("forge", "raw_materials"));
-        TagKey<Item> commonRawMaterialsTag = ItemTags.create(new ResourceLocation("c", "raw_materials"));
-        
-        // Add vanilla ores with their default weights
-        for (Map.Entry<Item, Double> entry : DEFAULT_ORE_WEIGHTS.entrySet()) {
-            ORE_WEIGHTS.put(new ItemStack(entry.getKey()), entry.getValue());
+        synchronized (ORE_WEIGHTS) {
+            // Double-check after acquiring lock
+            if (initialized) {
+                return;
+            }
+            
+            // Create tags for raw materials and ores
+            TagKey<Item> forgeRawMaterialsTag = ItemTags.create(new ResourceLocation("forge", "raw_materials"));
+            TagKey<Item> commonRawMaterialsTag = ItemTags.create(new ResourceLocation("c", "raw_materials"));
+            
+            // Add vanilla ores with their default weights
+            for (Map.Entry<Item, Double> entry : DEFAULT_ORE_WEIGHTS.entrySet()) {
+                ORE_WEIGHTS.put(new ItemStack(entry.getKey()), entry.getValue());
+            }
+            
+            // Scan for modded raw materials from both Forge and Common tags
+            addModdedOresFromTag(forgeRawMaterialsTag);
+            addModdedOresFromTag(commonRawMaterialsTag);
+            
+            TOTAL_WEIGHT = ORE_WEIGHTS.values().stream().mapToDouble(d -> d).sum();
+            initialized = true;
         }
-        
-        // Scan for modded raw materials from both Forge and Common tags
-        addModdedOresFromTag(forgeRawMaterialsTag);
-        addModdedOresFromTag(commonRawMaterialsTag);
-        
-        TOTAL_WEIGHT = ORE_WEIGHTS.values().stream().mapToDouble(d -> d).sum();
     }
     
     /**
@@ -77,19 +87,24 @@ public class DiamondOreGolem extends MiniGolem {
                 continue;
             }
             // Skip if already added from another tag
-            boolean alreadyAdded = false;
-            for (ItemStack existing : ORE_WEIGHTS.keySet()) {
-                if (existing.is(item)) {
-                    alreadyAdded = true;
-                    break;
-                }
-            }
-            if (alreadyAdded) {
+            if (isItemAlreadyAdded(item)) {
                 continue;
             }
-            // Add modded raw materials with a medium weight
-            ORE_WEIGHTS.put(new ItemStack(item), 15.0);
+            // Add modded raw materials with a default weight
+            ORE_WEIGHTS.put(new ItemStack(item), MODDED_ORE_DEFAULT_WEIGHT);
         }
+    }
+    
+    /**
+     * Checks if an item is already in the ore weights map.
+     */
+    private boolean isItemAlreadyAdded(Item item) {
+        for (ItemStack existing : ORE_WEIGHTS.keySet()) {
+            if (existing.is(item)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
